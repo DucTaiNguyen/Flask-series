@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+              integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+              integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+                crossorigin="anonymous"></script>
+        <meta charset="UTF-8">
+        <title>Recipes</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    </head>
+<body>
+      <div>
+            <p id="recipeTitle">
+                {{ recipe_id[0]['title'] }} <button id="downloadBtn" type=button class='btn btn-link' onclick="getPdf()">
+            <span class='glyphicon glyphicon-download'></span></button>
+            </p>
+        </div>{% for entry in recipe_id[0]['extendedIngredients'] %}
+<li>{{entry['originalString']}}</li>
+{% endfor %}
+<img id="recipeImage" src=" {{ recipe_id[0]['image'] }}">
+<p id="recipeInstructions">{{ recipe_id[0]['instructions'] }}</p>
+
+
+
+</body>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" language="javascript" src="{{url_for('static', filename='js/jquery.js')}}" ></script>
+<script>window.jQuery</script>
+<script type="text/javascript" language="javascript" src="{{url_for('static', filename='js/recipe_detail.js')}}"></script> -->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="{{url_for('static', filename='js/jquery.js')}}">\x3C/script>')</script>
+<script type="text/javascript" language="javascript" src="{{url_for('static', filename='js/recipe_detail.js')}}"></script>
+</html>
