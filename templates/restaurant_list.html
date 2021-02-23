@@ -14,17 +14,29 @@
         <meta charset="UTF-8">
         <title>Title</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <style> #latestSearches {
+            font-size: 12px;
+            font-style: italic;
+            margin-left: 15px;
+        }</style>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     </head>
 <body>
-    
-    <form method="POST">
+
+
+
+    <div id="latestSearches">Latest searches include: {{searchHistory['searches']|join(', ')}}</div>
+
+
+
+
+    <form method="POST" autocomplete="off">
         <div class='col-xs-12 col-sm-12 col-md-10 col-lg-10'>
             <div class='input-group'>
-                <input class='form-control' type='text' name='restaurant_name'
+                <input id="autocomplete" class='form-control' type='text' name='restaurant_name'
                        placeholder='Enter ingredients separated by commas...'/>
                 <span class="input-group-btn">
-                  <button type='submit' class='btn btn-default'>
+                  <button id="searchBtn" type='submit' class='btn btn-default'>
                     <span class='glyphicon glyphicon-search'></span>
                   </button>
                 </span>
@@ -32,6 +44,8 @@
             </div>
         </div>
     </form>
+ 
+
 
     <div class='col-xs-12 col-sm-12 col-md-10 col-lg-10'>
         {% if response!=undefined and response|length > 0%}
@@ -59,15 +73,35 @@
     </div>
     
 
+
+    <!-- <table>
+        <tr>
+           {% for entry in ans %}
+       <div class='col-md-3' id="recipeSelectionComponent">
+                      <img id="recipeImage" src="{{ entry['image'] }}">
+            <button id="{{ entry['id'] }}" type=button class="btn btn-link"
+      onclick="getRecipeDetails({{ entry['id'] }})">{{ entry['title'] }}
+            </button>
+      </div>
+           {% endfor %}
+              </tr>
+       <tr>
+           {% for entry in userRecipes %}
+       <div class='col-md-3' id="userRecipeSelectionComponent">
+                      <img id="userRecipeImage" src="{{ entry['image'] }}">
+          <button id="{{ entry['user_recipe_id'] }}" type=button class="btn btn-link" onclick="getUserRecipeDetails({{ entry['user_recipe_id'] }})">{{ entry['name'] }}
+          </button>
+        </div>
+          {% endfor %}
+            </tr>
+  </table> -->
+
+
+
 </body>
-<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type="text/javascript" language="javascript" src="static\js\jquery.js"></script>
-<script>window.jQuery</script>
-<script type="text/javascript" language="javascript" src="static\js\recipe_detail.js"></script> -->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="{{url_for('static', filename='js/jquery.js')}}">\x3C/script>')</script>
 <script type="text/javascript" language="javascript" src="{{url_for('static', filename='js/recipe_detail.js')}}"></script>
-
 
 </html>
