@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base_template.html" %}
+
+{% block body %}
+<body>
+<h1>Add your own recipe</h1>
+<form action="/userRecipe" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32) }}
+    </p>
+    <p>
+        {{ form.ingredients.label }}<br>
+        {{ form.ingredients(size=32) }}
+    </p>
+    <p>
+        {{ form.instructions.label }}<br>
+        {{ form.instructions(size=32) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+</body>
+{% endblock %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="{{url_for('static', filename='js/jquery.js')}}">\x3C/script>')</script>
+<script type="text/javascript" language="javascript" src="{{url_for('static', filename='js/recipe_detail.js')}}"></script>
+</html>
