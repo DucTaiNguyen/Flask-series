@@ -1,15 +1,12 @@
-certifi==2020.12.5
-chardet==4.0.0
-click==7.1.2
-Flask==1.1.2
-Flask-Login==0.5.0
-Flask-WTF==0.14.3
-idna==2.10
-itsdangerous==1.1.0
-Jinja2==2.11.3
-MarkupSafe==1.1.1
-pony==0.7.14
-requests==2.25.1
-urllib3==1.26.3
-Werkzeug==1.0.1
-WTForms==2.3.3
+Collecting freeze
+  Downloading freeze-3.0.tar.gz (188 kB)
+Collecting six
+  Using cached six-1.15.0-py2.py3-none-any.whl (10 kB)
+Building wheels for collected packages: freeze
+  Building wheel for freeze (setup.py): started
+  Building wheel for freeze (setup.py): finished with status 'done'
+  Created wheel for freeze: filename=freeze-3.0-py3-none-any.whl size=12103 sha256=09847343f7f15cb1b1865c4f3e6162444095618f85458216001285c6a775b4ce
+  Stored in directory: c:\users\admin\appdata\local\pip\cache\wheels\db\70\b0\68e4c732f3266bfca35b71cf9e00709bfeb3da27bc35b1feb4
+Successfully built freeze
+Installing collected packages: six, freeze
+Successfully installed freeze-3.0 six-1.15.0

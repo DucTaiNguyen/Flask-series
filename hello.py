@@ -17,6 +17,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired
 from flask_login import UserMixin,current_user,LoginManager,login_user
+
+
 app = Flask(__name__)
 
 
@@ -162,49 +164,6 @@ def user_registry():
         return render_template('registry_form.html', title='Register', form=form)
 
 
-@app.route('/', methods=['GET', 'POST'])
-def get_recipe():
-    ingredients_searched = []
-    chip_ingredients = []
-    user_recipes = []
-    suggestions_as_json = {"searches": ingredients_searched}
-    chip_ingredients_as_json = {"chipIngredients": chip_ingredients}
-    user_recipes_as_json = {"userRecipes": user_recipes}
-    if request.method == 'POST':
-        search_suggestions = select(prod for prod in SearchSuggestion).order_by(lambda prod: desc(prod.id))[:5]
-        for entry in search_suggestions:
-            ingredients_searched.append(entry.ingredient)
-        suggestions_as_json = {"searches": ingredients_searched}
-
-        ing_suggestions = select(prod for prod in SearchSuggestion)#####  IngredientChip
-        for entry in ing_suggestions:
-            chip_ingredients.append(entry)
-        chip_ingredients_as_json = {"chipIngredients": chip_ingredients}
-        ingredients = ",".join(map(lambda db_entry: db_entry.ingredient, chip_ingredients))
-        print ("Ingredients ",ingredients)
-        recipes = UserCreatedRecipe.select(
-            lambda recipe1: ingredients in recipe1.ingredients) # if ingredients in userRecipe.ingredients
-        print ("Recipes",recipes)
-        for recipe_from_user in recipes:
-            print (recipe_from_user.name)
-            user_recipes.append({"name":recipe_from_user.name,"ingredients":recipe_from_user.ingredients,
-                                 "instructions":recipe_from_user.instructions,
-                                 "user_recipe_id": recipe_from_user.id})
-        user_recipes_as_json = {"userRecipes": user_recipes}
-        print(user_recipes_as_json)
-        content = requests.get(
-            "https://api.spoonacular.com/recipes/findByIngredients?ingredients=" +
-            convert_input(ingredients) +
-            "&apiKey=" + API_KEY)
-        json_response = json.loads(content.text)
-        return render_template("recipes_list.html", ans=json_response, searchHistory=suggestions_as_json,
-                               chipIngredients=chip_ingredients_as_json, userRecipes=user_recipes_as_json['userRecipes'])
-    else:
-        delete(ingredient for ingredient in IngredientChip)
-        return render_template("recipes_list.html", searchHistory=suggestions_as_json,
-                               chipIngredients=chip_ingredients_as_json, userRecipes=user_recipes_as_json['userRecipes'])
-
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 @login_manager.user_loader
@@ -262,113 +221,139 @@ def activate(id):
             login_user(user)
             return redirect('/')
 
-# @db_session
-# @app.route('/autocomplete/<inp>', methods=['GET'])
-# def autocomplete(inp):
-#     ingredients = ["avocado", "apple", "allspice", "almonds", "aspargus", "aubergine", "arugula", "ananas",
-#     "butter", "bread", "beef", "baking soda", "bell peper", "basil", "brown sugar", "broccoli", "banana",
-#     "cinnamon", "carrot", "chicken", "cream", "cheese", "cauliflower",
-#     "dijon", "dill", "dark chocolate", "dry mustard",
-#     "egg", "entrecote", "egg yolk", "eggplant",
-#     "flour", "fusilli", "farfalle",
-#     "garlic", "ginger", "ground beef", "green pepper", "ground meat",
-#     "honey", "heavy cream", "hot pepper sauce", "hot sauce",
-#     "ice", "ice cream", "italian herbs",
-#     "jalapeno", "jam",
-#     "ketchup", "kale", "kiwi", "kosher salt",
-#     "lemon", "lime", "light cream", "lettuce", "lentils", "leek",
-#     "mayonnaise", "mustard", "meat", "milk", "mushrooms",
-#     "nutmeg", "noodles", "nutella",
-#     "olive oil", "onion", "olives", "oregano", "orange",
-#     "pear", "peach", "parmesan", "potatoes", "pineapple",
-#     "quinoa", "red lentils", "red pepper", "romaine lettuce",
-#     "sugar", "sour cream", "soy sauce",
-#     "tomatoes", "thyme", "tomato sauce", "tuna",
-#     "vegetable oil", "vanilla", "vodka", "vinegar", "vegetable broth",
-#     "wheat", "walnut", "white wine", "whipped cream", "worcestershire sauce",
-#     "yoghurt", "yeast", "zuchinni"]
-#     user_recipes = select(recipe for recipe in UserCreatedRecipe)
-#     for recipe in user_recipes:
-#         ingredients.extend(map(lambda st: st.strip(), map(lambda s: str(s), recipe.ingredients.split(','))))
-#         filtered=filter(lambda ing: ing.startswith(inp),set(ingredients))
-#     return make_response({"listaing":filtered}, 200)
+@db_session
+@app.route('/autocomplete/<inp>', methods=['GET'])
+def autocomplete(inp):
+    ingredients = ["avocado", "apple", "allspice", "almonds", "aspargus", "aubergine", "arugula", "ananas",
+    "butter", "bread", "beef", "baking soda", "bell peper", "basil", "brown sugar", "broccoli", "banana",
+    "cinnamon", "carrot", "chicken", "cream", "cheese", "cauliflower",
+    "dijon", "dill", "dark chocolate", "dry mustard",
+    "egg", "entrecote", "egg yolk", "eggplant",
+    "flour", "fusilli", "farfalle",
+    "garlic", "ginger", "ground beef", "green pepper", "ground meat",
+    "honey", "heavy cream", "hot pepper sauce", "hot sauce",
+    "ice", "ice cream", "italian herbs",
+    "jalapeno", "jam",
+    "ketchup", "kale", "kiwi", "kosher salt",
+    "lemon", "lime", "light cream", "lettuce", "lentils", "leek",
+    "mayonnaise", "mustard", "meat", "milk", "mushrooms",
+    "nutmeg", "noodles", "nutella",
+    "olive oil", "onion", "olives", "oregano", "orange",
+    "pear", "peach", "parmesan", "potatoes", "pineapple",
+    "quinoa", "red lentils", "red pepper", "romaine lettuce",
+    "sugar", "sour cream", "soy sauce",
+    "tomatoes", "thyme", "tomato sauce", "tuna",
+    "vegetable oil", "vanilla", "vodka", "vinegar", "vegetable broth",
+    "wheat", "walnut", "white wine", "whipped cream", "worcestershire sauce",
+    "yoghurt", "yeast", "zuchinni"]
+    user_recipes = select(recipe for recipe in UserCreatedRecipe)
+    for recipe in user_recipes:
+        ingredients.extend(map(lambda st: st.strip(), map(lambda s: str(s), recipe.ingredients.split(','))))
+        filtered=filter(lambda ing: ing.startswith(inp),set(ingredients))
+    return make_response({"listaing":filtered}, 200)
+
+
+@app.route('/addIngredient',methods=['POST'])
+def addIngredient():
 
 
 
-# @app.route('/', methods=['GET', 'POST'])
+    pass
+
+#####################################################################################################
+''' 
+This one is not working with "userRecipes". I dont have user at this point.
+'''
+
+
+# @app.route('/', methods=['GET', 'POST']) 
 # def get_recipe():
 #     ingredients_searched = []
 #     chip_ingredients = []
+#     user_recipes = []
 #     suggestions_as_json = {"searches": ingredients_searched}
 #     chip_ingredients_as_json = {"chipIngredients": chip_ingredients}
+#     user_recipes_as_json = {"userRecipes": user_recipes}
 #     if request.method == 'POST':
 #         search_suggestions = select(prod for prod in SearchSuggestion).order_by(lambda prod: desc(prod.id))[:5]
-#         print("search_suggestions",search_suggestions )
 #         for entry in search_suggestions:
 #             ingredients_searched.append(entry.ingredient)
-#         print("ingredients_searched :" ,ingredients_searched)    
 #         suggestions_as_json = {"searches": ingredients_searched}
 
-
-#         ing_suggestions = select(prod for prod in SearchSuggestion)
-#         print(ing_suggestions)
-#         for entry in ing_suggestions:
+#         ing_suggestions = select(prod for prod in SearchSuggestion)##### I change from IngredientChip to SearchSuggestion
+#         for entry in ing_suggestions:                               #### 
 #             chip_ingredients.append(entry)
-#             print(entry)
 #         chip_ingredients_as_json = {"chipIngredients": chip_ingredients}
-
 #         ingredients = ",".join(map(lambda db_entry: db_entry.ingredient, chip_ingredients))
-#         print(ingredients)
+#         print ("Ingredients ",ingredients)
+#         recipes = UserCreatedRecipe.select(
+#             lambda recipe1: ingredients in recipe1.ingredients) # if ingredients in userRecipe.ingredients
+#         print ("Recipes",recipes)
+#         for recipe_from_user in recipes:
+#             print (recipe_from_user.name)
+#             user_recipes.append({"name":recipe_from_user.name,"ingredients":recipe_from_user.ingredients,
+#                                  "instructions":recipe_from_user.instructions,
+#                                  "user_recipe_id": recipe_from_user.id})
+#         user_recipes_as_json = {"userRecipes": user_recipes}
+#         print(user_recipes_as_json)
 #         content = requests.get(
 #             "https://api.spoonacular.com/recipes/findByIngredients?ingredients=" +
 #             convert_input(ingredients) +
 #             "&apiKey=" + API_KEY)
 #         json_response = json.loads(content.text)
-#         print(json_response)
 #         return render_template("recipes_list.html", ans=json_response, searchHistory=suggestions_as_json,
-#                                chipIngredients=chip_ingredients_as_json) if json_response != [] else render_template(
-#             "recipes_list.html", ans="", searchHistory=suggestions_as_json, chipIngredients=chip_ingredients_as_json)
-#     else:
+#                                chipIngredients=chip_ingredients_as_json, userRecipes=user_recipes_as_json['userRecipes'])
+#     else: 
 #         delete(ingredient for ingredient in IngredientChip)
 #         return render_template("recipes_list.html", searchHistory=suggestions_as_json,
-#                                chipIngredients=chip_ingredients_as_json)
+#                                chipIngredients=chip_ingredients_as_json, userRecipes=user_recipes_as_json['userRecipes'])
 
 
+#########################################################################################################################
+'''
+This block work well with no user register
+'''
 
 
-
-# @app.route('/', methods=['GET', 'POST'])
-# def get_recipe():
-#     ingredients_searched = []
-#     suggestions_as_json = {"searches": ingredients_searched}
-#     if request.method == 'POST':
-#         ingredients = "".join(request.form['restaurant_name'].split()).split(",")
-#         with db_session:
-#             [SearchSuggestion(ingredient=suggestion) for suggestion in ingredients]
-
-#         search_suggestions = select(prod for prod in SearchSuggestion).order_by(lambda prod: desc(prod.id))[:5]
-#         for entry in search_suggestions:
-#             ingredients_searched.append(entry.ingredient)
-#         suggestions_as_json = {"searches": ingredients_searched}
-
-#         content = requests.get(
-#             "https://api.spoonacular.com/recipes/findByIngredients?ingredients=" +
-#             convert_input(request.form['restaurant_name']) +
-#             "&apiKey=" + API_KEY)
-#         json_response = json.loads(content.text)
-#         print(json_response)
-#     #     return render_template("restaurant_list.html", response=json_response,searchHistory = suggestions_as_json) if json_response != [] else render_template(
-#     #         "restaurant_list.html", response="",searchHistory=suggestions_as_json)
-#     # else:
-#     #     return render_template("restaurant_list.html",searchHistory=suggestions_as_json)        
-
-#         return render_template("recipes_list.html", ans = json_response, searchHistory = suggestions_as_json) if json_response != [] else render_template("restaurant_list.html",ans="",searchHistory=suggestions_as_json)
-#     else:
-#         return render_template("recipes_list.html",searchHistory=suggestions_as_json)
+@app.route('/', methods=['GET', 'POST'])
+def get_recipe():
+    ingredients_searched = []
+    chip_ingredients = []
+    suggestions_as_json = {"searches": ingredients_searched}
+    chip_ingredients_as_json = {"chipIngredients": chip_ingredients}
+    if request.method == 'POST':
+        search_suggestions = select(prod for prod in SearchSuggestion).order_by(lambda prod: desc(prod.id))[:5]
+        print("search_suggestions",search_suggestions )
+        for entry in search_suggestions:
+            ingredients_searched.append(entry.ingredient)
+        print("ingredients_searched :" ,ingredients_searched)    
+        suggestions_as_json = {"searches": ingredients_searched}
 
 
+        ing_suggestions = select(prod for prod in SearchSuggestion)
+        print(ing_suggestions)
+        for entry in ing_suggestions:
+            chip_ingredients.append(entry)
+            print(entry)
+        chip_ingredients_as_json = {"chipIngredients": chip_ingredients}
 
+        ingredients = ",".join(map(lambda db_entry: db_entry.ingredient, chip_ingredients))
+        print(ingredients)
+        content = requests.get(
+            "https://api.spoonacular.com/recipes/findByIngredients?ingredients=" +
+            convert_input(request.form['restaurant_name']) + ##### His original code:   convert_input(ingredients)
+            "&apiKey=" + API_KEY)
+        json_response = json.loads(content.text)
+        print(json_response)
+        return render_template("recipes_list.html", ans=json_response, searchHistory=suggestions_as_json,
+                               chipIngredients=chip_ingredients_as_json) if json_response != [] else render_template(
+            "recipes_list.html", ans="", searchHistory=suggestions_as_json, chipIngredients=chip_ingredients_as_json)
+    else:
+        delete(ingredient for ingredient in IngredientChip)
+        return render_template("recipes_list.html", searchHistory=suggestions_as_json,
+                               chipIngredients=chip_ingredients_as_json)
 
+################################################################################################################################
 
 @app.route('/recipe/<recipe_id>', methods=['GET'])
 def recipe(recipe_id):
